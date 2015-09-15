@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- resource://jid1-iiczh0ooz49ctg-at-jetpack/webguide/data/test/web-guide-test.html -->
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body ng-app="wgmTest" ng-controller="Test">
+
+<button ng-click="run()">Test</button>
+
+    
+
+
+    <script src="../contrib/angular.js"></script>
+    <script src="../contrib/lodash.min.js"></script>
+    <script src="../contrib/restangular.js"></script>
+    <script src="../app/services/web-guide.js"></script>
+    
+    <script>
+
+(function() {
+
+	var test = angular.module('wgmTest', [ 'WebGuide.Service' ]);
+    
+    test.config([
+            '$compileProvider', 'RestangularProvider',
+            function ($compileProvider, RestangularProvider) {
+                //$stateProvider.state(mainState);
+                RestangularProvider.setBaseUrl('http://localhost:5000/v1');
+                $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension):/);
+                // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
+            }
+        ]);
+
+
+	test.controller('Test', ['$scope', 'WebGuide', function($scope, WebGuide) {
+		  
+        $scope.run = function(){
+            
+            var guide = {
+                title: "title1",
+                description: "desc1",
+                pages:[
+                    {
+                        comment: "page1",
+                        "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAADCAYAAACqPZ51AAAAEklEQVQImWMQ6330nxjMQHWFAPTeS3n1L96wAAAAAElFTkSuQmCC",
+                        orderId: 1,
+                        region: "{}",
+                    },
+                    {
+                        comment: "page2",
+                        "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAADCAYAAACqPZ51AAAAEklEQVQImWMQ6330nxjMQHWFAPTeS3n1L96wAAAAAElFTkSuQmCC",
+                        orderId: 2,
+                        region: "{}",
+                    }
+                ]
+            };
+            
+            WebGuide.saveGuide(guide).then(
+                function(){
+                    console.log('Save guide is success');
+                },
+                function(){
+                    console.log('Save guide is failed');
+                }
+            );
+        }
+    }]);
+})();
+                             
+
+    </script>
+</body>
+</html>

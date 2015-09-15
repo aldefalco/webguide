@@ -1,0 +1,42 @@
+@CHARSET "UTF-8";
+
+a {
+	padding: 20px;
+}
+
+.jq-cropper{
+	width:700px;
+	height:500px;
+}
+
+.menu{
+    background: #88f;
+color: #000;
+    
+}
+
+.menu li{
+    display: inline-block;
+    padding: 10px;
+}
+
+.menu a{
+    padding: 20px;
+font-weight: bold;
+color: #fff;
+text-decoration: azure;
+}
+
+.menu .active{
+    background-color: rgb(102, 102, 255);
+}
+    
+
+.btn{
+    background: #88f;
+    padding: 5px 20px;
+    display: inline-block;
+    color: #fff;
+    text-decoration: azure;
+    border: 1px soild #77f; 
+}

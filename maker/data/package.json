@@ -1,0 +1,8 @@
+{
+  "name": "wgmakerUI",
+  "title": "Maker UI",
+  "description": "UI for the Web Guide Maker Firefox extension",
+  "author": "Alex Sh.",
+  "license": "MPL 2.0",
+  "version": "0.0.1"
+}

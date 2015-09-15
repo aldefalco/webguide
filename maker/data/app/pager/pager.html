@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Insert title here</title>
+</head>
+
+<body ng-app="wgmPager" ng-controller="Pager">
+
+    <button ng-click="screenshot()">Screenshot</button>
+    <button ng-click="save()">Save Guide</button>
+
+    <h1>Guide pages</h1>
+
+    <ul>
+        <li ng-repeat="page in pages">
+            <img src="{{page.image.cropped}}" style="height:30px; display:block">
+            <div>{{page.comments}}</div>
+        </li>
+    </ul>
+
+    <script src="../../contrib/angular.js"></script>
+    <script src="../../contrib/angular-ui-router.js"></script>
+    <script src="../../services/maker.js"></script>
+    <script src="../../contrib/lodash.min.js"></script>
+    <script src="../../contrib/restangular.js"></script>
+    <script src="../../app/services/web-guide.js"></script>
+    <script src="../../app/services/maker.js"></script>
+    <script src="pager.js"></script>
+    <script>
+        console.log('==============')
+         console.log(angular.version);
+    </script>
+
+</body>
+
+</html>
