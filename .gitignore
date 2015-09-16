@@ -1,2 +1,4 @@
 /node_modules
 /server/*.pyc
+/guide_server/*.pyc
+/guide_server/tests/*.pyc

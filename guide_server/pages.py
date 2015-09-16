@@ -1,6 +1,6 @@
 __author__ = 'alex'
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, abort
 from app import instance as app, cache
 import model
 
@@ -16,7 +16,10 @@ def index():
 @cache.cached()
 def get_guide(id):
     guide = model.Guide.query.get(id)
+    if not guide:
+        abort(404)
     return render_template('guide.html', guide = guide )
+
 
 
 app.register_blueprint(page)

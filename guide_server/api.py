@@ -54,6 +54,7 @@ class GuideListApi(Resource):
         try:
             guide = Guide(**args)
             db.session.add(guide)
+            #db.session.execute("NOTIFY guide, '%s'" % guide.id)
             db.session.commit()
             return marshal(guide, guide_fields), 201
         except Exception as e:
@@ -85,6 +86,7 @@ class GuideApi(Resource):
         args = self.parser.parse_args()
         try:
             db.session.query(Guide).filter_by(id=id).update(args)
+            #db.session.execute("NOTIFY guide, '%s'" % id)
             db.session.commit()
             guide = Guide.query.get(id)
             return marshal(guide, guide_fields), 201
