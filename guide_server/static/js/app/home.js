@@ -17,17 +17,13 @@
         $scope.query = '';
         $scope.guides = [];
         $scope.titles = [];
+
         $scope.search = function(){
             Search.search($scope.query).then(function(result){
-
                 $scope.guides = result;
-                /*
-                $scope.$apply(function(){
-                    $scope.result = result;
-                });
-                */
             });
         };
+
         $scope.autofill = function(prefix){
             if(prefix && prefix.length>2){
                Search.autocomplete(prefix).then(function(result){

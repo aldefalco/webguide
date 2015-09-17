@@ -1,5 +1,3 @@
-
-
 from app import instance as app
 
 import  pages

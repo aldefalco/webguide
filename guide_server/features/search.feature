@@ -27,9 +27,9 @@ Feature: Search
   @dev
   Scenario: Autocomplete with one entry
     Given I set Content-Type header to "application/json"
-    When I send a POST request to "search/autocomplete/title"
+    When I send a POST request to "search/autocomplete"
     """
-      { "title":"new" }
+      { "prefix":"new" }
     """
     Then the response status should be "200"
     And the JSON at path "hits.total" should be 1

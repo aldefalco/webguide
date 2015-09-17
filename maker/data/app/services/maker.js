@@ -3,7 +3,6 @@
 var Maker = {
 	screenshot : function() {
 		addon.port.emit('screenshot');
-		//self.postMessage({ command: 'screenshot'}, "*");
 	},
     
     save : function(pages) {
@@ -12,7 +11,6 @@ var Maker = {
     
     complete : function() {
 		addon.port.emit('complete');
-		//self.postMessage({ command: 'screenshot'}, "*");
 	},
     
     __fireAppendPage: function(data){

@@ -19,11 +19,11 @@ channel_filters = {
              ]
 }
 
-PREFIX = "flask_cache_view//v1/"
+REDIS_PREFIX = "flask_cache_view//v1/"
 
 if __name__ == '__main__':
     print "Cache sync v %s" % __version__
     r = redis.StrictRedis(db=2)
     connection = psycopg2.connect(database="webguide", user="dev", password="devpass")
     connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
-    loop.run(connection, updater(r, PREFIX), channel_filters)
+    loop.run(connection, updater(r, REDIS_PREFIX), channel_filters)

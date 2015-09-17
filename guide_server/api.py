@@ -8,6 +8,7 @@ Web guide api implementation
 __author__ = 'alex'
 
 import traceback
+import logging
 
 from flask.ext import restful
 from flask.ext.restful import marshal, fields, Resource
@@ -24,6 +25,7 @@ es = Elasticsearch(conf.ES_SETTINGS)
 
 
 api = restful.Api(app)
+log = logging.getLogger('api')
 
 @declare_api(api, '/ping', [] )
 class Ping(Resource):
@@ -52,6 +54,7 @@ class GuideListApi(Resource):
             all_guides = Guide.query.all()
             return marshal(all_guides, guide_fields)
         except Exception as e:
+            log.exception(e.message)
             return { 'error': e.message }, 501
 
     def post(self):
@@ -59,10 +62,12 @@ class GuideListApi(Resource):
         try:
             guide = Guide(**args)
             db.session.add(guide)
+            #Example hot we can execute the SQL commands directly, Very, very bad practice!. Moved it to triggers
             #db.session.execute("NOTIFY guide, '%s'" % guide.id)
             db.session.commit()
             return marshal(guide, guide_fields), 201
         except Exception as e:
+            log.exception(e.message)
             traceback.print_exc()
             return { 'error': e.message }, 501
 
@@ -72,6 +77,7 @@ class GuideListApi(Resource):
             db.session.commit()
             return {}, 204
         except Exception as e:
+            log.exception(e.message)
             return { 'error': e.message }, 501
 
 
@@ -85,17 +91,18 @@ class GuideApi(Resource):
             guide = Guide.query.get(id)
             return marshal(guide, guide_fields)
         except Exception as e:
+            log.exception(e.message)
             return { 'error': e.message }, 501
 
     def put(self, id):
         args = self.parser.parse_args()
         try:
             db.session.query(Guide).filter_by(id=id).update(args)
-            #db.session.execute("NOTIFY guide, '%s'" % id)
             db.session.commit()
             guide = Guide.query.get(id)
             return marshal(guide, guide_fields), 201
         except Exception as e:
+            log.exception(e.message)
             traceback.print_exc()
             return { 'error': e.message }, 501
 
@@ -103,10 +110,12 @@ class GuideApi(Resource):
         try:
             guide = Guide.query.get(id)
             db.session.delete(guide)
-            db.session.execute("SELECT setval('public.guide_id_seq', 1, true);")
+            #Example how we can to reset seq. TODO: remove it
+            #db.session.execute("SELECT setval('public.guide_id_seq', 1, true);")
             db.session.commit()
             return {  }, 204
         except Exception as e:
+            log.exception(e.message)
             return { 'error': e.message }, 501
 
 pages_fields = {
@@ -125,6 +134,7 @@ class GuidePageListApi(Resource):
             guide = Guide.query.get(guide_id)
             return marshal(guide.pages.all(), pages_fields)
         except Exception as e:
+            log.exception(e.message)
             return { 'error': e.message }, 501
 
 
@@ -138,6 +148,7 @@ class GuidePageListApi(Resource):
             db.session.commit()
             return marshal(page, pages_fields), 201
         except Exception as e:
+            log.exception(e.message)
             traceback.print_exc()
             return { 'error': e.message }, 501
 
@@ -149,6 +160,7 @@ class GuidePageListApi(Resource):
             db.session.commit()
             return {  }, 204
         except Exception as e:
+            log.exception(e.message)
             return { 'error': e.message }, 501
 
 
@@ -171,6 +183,7 @@ class GuidePageApi(Resource):
             page = guide.pages.filter_by(id=id).first()
             return marshal(page, page_fields)
         except Exception as e:
+            log.exception(e.message)
             return { 'error': e.message }, 501
 
     def put(self, guide_id, id):
@@ -187,6 +200,7 @@ class GuidePageApi(Resource):
             db.session.commit()
             return marshal(page, page_fields), 201
         except Exception as e:
+            log.exception(e.message)
             traceback.print_exc()
             return { 'error': e.message }, 501
 
@@ -198,6 +212,7 @@ class GuidePageApi(Resource):
             db.session.commit()
             return {  }, 204
         except Exception as e:
+            log.exception(e.message)
             return { 'error': e.message }, 501
 
 
@@ -210,6 +225,7 @@ class AutocompleteApi(Resource):
             prefix = args['prefix']
             return es.search(index=conf.ES_INDEX, body={"query": {"prefix" : { "title" : prefix }}})
         except Exception as e:
+            log.exception(e.message)
             traceback.print_exc()
             return { 'error': e.message }, 501
 
@@ -223,11 +239,12 @@ class SearchApi(Resource):
             return es.search(index=conf.ES_INDEX, body=
             { "query": { "multi_match" : {  "query": query,  "type":"most_fields", "fields": [ "title^10", "description" ] } } } )
         except Exception as e:
+            log.exception(e.message)
             traceback.print_exc()
             return { 'error': e.message }, 501
 
 @app.after_request
-def after_request(response):
+def fix_headers_for_CORS(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')

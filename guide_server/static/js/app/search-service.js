@@ -10,8 +10,7 @@
         function ($q, $http, Restangular) {
 
             var _search = Restangular.all('search'),
-                _autocomplete = Restangular.all('search/autocomplete'),
-                _guides = Restangular.all('guide');
+                _autocomplete = Restangular.all('search/autocomplete');
 
             return {
 

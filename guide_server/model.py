@@ -1,5 +1,5 @@
 """
-This is the application model based on SQLAlchemy ORM
+This is the application's model based on SQLAlchemy ORM
 
 Simple model's tests:
 

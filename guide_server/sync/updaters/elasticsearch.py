@@ -1,7 +1,7 @@
 '''
-
+Elastic search updater
 '''
-from flask import jsonify
+
 
 __author__ = 'alex'
 
@@ -11,6 +11,7 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 
 log = logging.getLogger('sync.updaters.elasticsearch')
 
+#TODO: move it form this module
 class AlchemyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj.__class__, DeclarativeMeta):

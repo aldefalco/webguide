@@ -13,18 +13,12 @@ var capture = require("./capture.js"),
                 editor.show();
                 editor.port.emit('screenshot', capture.tab());
             });
-            
+
             worker.port.on("save", function (pages) {
                 console.log("Save");
                 save.show();
                 save.port.emit('openSave', pages);
             });
-
-            /*
-             worker.port.on("ping", function() {
-             console.log("add-on script got the message");
-             worker.port.emit("pong");
-             });*/
         }
     }),
 
@@ -33,7 +27,7 @@ var capture = require("./capture.js"),
         height: 600,
         contentURL: "./app/editor/editor.html"
     }),
-    
+
     save = require("sdk/panel").Panel({
         width: 500,
         height: 300,
@@ -57,8 +51,6 @@ var capture = require("./capture.js"),
 
 editor.port.on("save", function (page) {
     editor.hide();
-    //console.log("=== save");
-    //console.log(page);
     pager.worker.port.emit('appendPage', page);
 });
 

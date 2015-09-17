@@ -1,5 +1,5 @@
 '''
-Create DB from model
+Create DB schema from the SQLAlchemy model
 
 '''
 __author__ = 'alex'

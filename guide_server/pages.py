@@ -1,3 +1,8 @@
+'''
+Simple application's pages
+
+'''
+
 __author__ = 'alex'
 
 from flask import Blueprint, render_template, abort
@@ -19,7 +24,6 @@ def get_guide(id):
     if not guide:
         abort(404)
     return render_template('guide.html', guide = guide )
-
 
 
 app.register_blueprint(page)
