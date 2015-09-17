@@ -15,11 +15,11 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      '../../maker/data/contrib/angular.js',
-      '../../maker/data/contrib/lodash.min.js',
-      '../../maker/data/contrib/restangular.js',
-      '../../maker/data/contrib/angular-ui-router.js',
-      '../../maker/data/app/**/*.js',
+      'firefox-mock.js',
+      '../../guide_server/static/js/contrib/angular.js',
+      '../../guide_server/static/js/contrib/lodash.min.js',
+      '../../guide_server/static/js/contrib/restangular.js',
+      '../../guide_server/static/js/app/**/*.js',
       '../../node_modules/angular-mocks/angular-mocks.js',	
       '**/*.tests.js'
     ],

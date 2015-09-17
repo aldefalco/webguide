@@ -16,6 +16,11 @@ from utils import declare_api, save_base64_image
 from app import instance as app, api_cache
 from model import db, Guide, Page
 
+import conf
+
+from elasticsearch import Elasticsearch
+
+es = Elasticsearch(conf.ES_SETTINGS)
 
 
 api = restful.Api(app)
@@ -98,6 +103,7 @@ class GuideApi(Resource):
         try:
             guide = Guide.query.get(id)
             db.session.delete(guide)
+            db.session.execute("SELECT setval('public.guide_id_seq', 1, true);")
             db.session.commit()
             return {  }, 204
         except Exception as e:
@@ -194,6 +200,31 @@ class GuidePageApi(Resource):
         except Exception as e:
             return { 'error': e.message }, 501
 
+
+@declare_api(api, '/v1/search/autocomplete',(('prefix', str),))
+class AutocompleteApi(Resource):
+
+    def post(self):
+        args = self.parser.parse_args()
+        try:
+            prefix = args['prefix']
+            return es.search(index=conf.ES_INDEX, body={"query": {"prefix" : { "title" : prefix }}})
+        except Exception as e:
+            traceback.print_exc()
+            return { 'error': e.message }, 501
+
+@declare_api(api, '/v1/search',(('query', str),))
+class SearchApi(Resource):
+
+    def post(self):
+        args = self.parser.parse_args()
+        try:
+            query = args['query']
+            return es.search(index=conf.ES_INDEX, body=
+            { "query": { "multi_match" : {  "query": query,  "type":"most_fields", "fields": [ "title^10", "description" ] } } } )
+        except Exception as e:
+            traceback.print_exc()
+            return { 'error': e.message }, 501
 
 @app.after_request
 def after_request(response):

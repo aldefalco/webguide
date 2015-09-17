@@ -1,23 +1,17 @@
 (function() {
 
-	var pager = angular.module('wgmPager', [ 'WebGuide.Service' ]);
+	var pager = angular.module('wgmPager', [ ]);
 	
      
-    pager.config([
-            '$compileProvider', 'RestangularProvider',
-            function ($compileProvider, RestangularProvider) {
-                RestangularProvider.setBaseUrl('http://localhost:5000/v1');
-                //$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension):/);
-                // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
-            }
-        ]);
-
     
-	pager.controller('Pager', ['$scope',  'WebGuide', function($scope,  WebGuide) {
+    
+	pager.controller('Pager', ['$scope',  function($scope,  WebGuide) {
 		  
         $scope.screenshot = Maker.screenshot;
         $scope.pages = [];
         $scope.save = function(){
+            
+            /*
             
             //TODO: fix it
             var pages = _.map($scope.pages, function(page, i){
@@ -43,6 +37,9 @@
                     console.log('Save guide is failed');
                 }
             );
+            */
+            
+            Maker.save($scope.pages);
         };
         
           Maker.onAppendPage(function(page){

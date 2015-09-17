@@ -13,6 +13,12 @@ var capture = require("./capture.js"),
                 editor.show();
                 editor.port.emit('screenshot', capture.tab());
             });
+            
+            worker.port.on("save", function (pages) {
+                console.log("Save");
+                save.show();
+                save.port.emit('openSave', pages);
+            });
 
             /*
              worker.port.on("ping", function() {
@@ -26,6 +32,12 @@ var capture = require("./capture.js"),
         width: 800,
         height: 600,
         contentURL: "./app/editor/editor.html"
+    }),
+    
+    save = require("sdk/panel").Panel({
+        width: 500,
+        height: 300,
+        contentURL: "./app/save/save.html"
     }),
 
     button = require("sdk/ui/button/toggle").ToggleButton({
@@ -45,7 +57,11 @@ var capture = require("./capture.js"),
 
 editor.port.on("save", function (page) {
     editor.hide();
-    console.log("=== save");
-    console.log(page);
+    //console.log("=== save");
+    //console.log(page);
     pager.worker.port.emit('appendPage', page);
+});
+
+save.port.on("complete", function () {
+    save.hide();
 });

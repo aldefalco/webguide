@@ -19,7 +19,6 @@ def declare_api(api, route, schema):
         cls.parser = reqparse.RequestParser()
         for n, t in schema:
             cls.parser.add_argument(n, type=t)
-            #print "add %s %s" % (n ,t)
     return reg
 
 

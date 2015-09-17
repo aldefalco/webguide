@@ -21,7 +21,7 @@
 
     editor.controller('Editor', ['$scope', '$state',
         function ($scope, $state) {
-            $scope.save = Maker.save;
+            $scope.save = Maker.savePage;
             
             $scope.image = {
                 

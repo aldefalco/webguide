@@ -1,10 +1,3 @@
-"""Reasonably complete set of BDD steps for testing a REST API.
-
-Some state is set-up and shared between steps using the context variable. It is
-reset at the start of every scenario by
-:func:`restapiblueprint.features.environment.before_scenario`
-
-"""
 from nose.tools import assert_equal
 import behave
 import decorator

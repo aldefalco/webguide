@@ -13,8 +13,6 @@ Feature: Page
       """
     Then the response status should be "201"
     And the JSON at path "id" should be 1
-    When I send a DELETE request to "guide/1/page"
-    Then the response status should be "204"
 
   Scenario: Add a new guide and a few pages
     Given I set Content-Type header to "application/json"

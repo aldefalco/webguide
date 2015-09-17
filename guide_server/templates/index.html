@@ -7,4 +7,33 @@
     instructions so you can post it here for your customers to show them how to
     do something on other internet sites.</p>
 
+<div ng-app="wgHome" ng-controller="wgSearch" ng-cloak>
+
+    {% raw %}
+
+    <!--label for="search">Find your guide:</label> <input id="search" type="text" ng-model="query"-->
+
+    <autocomplete data="titles" ng-model="query" on-type="autofill"></autocomplete>
+
+    <button ng-click="search()">Search</button>
+
+    <ul class="result">
+        <li ng-repeat="guide in guides">
+            <h2>{{ guide.title }}</h2>
+            <a ng-href="{{  guide.href }}">{{ guide.description }}</a>
+        </li>
+    </ul>
+
+    {% endraw %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/contrib/lodash.min.js') }}" ></script>
+    <script src="{{ url_for('static', filename='js/contrib/angular.js') }}" ></script>
+    <script src="{{ url_for('static', filename='js/contrib/restangular.js') }}" ></script>
+    <script src="{{ url_for('static', filename='js/contrib/autocomplete.js') }}" ></script>
+    <script src="{{ url_for('static', filename='js/app/search-service.js') }}" ></script>
+    <script src="{{ url_for('static', filename='js/app/home.js') }}" ></script>
 {% endblock %}
