@@ -1,32 +1,40 @@
 '''
-Search sync service
+Simple search sync service
 
 '''
+import json
 
 __author__ = 'alex'
-__version__  = '0.0.1'
+__version__  = '0.0.2'
 
 
-import psycopg2
-import psycopg2.extensions
 from elasticsearch import Elasticsearch
+import redis
 
-import model
 import conf
 
-from sync import loop
-from updaters.elasticsearch import updater
-
-channel_params = {
-    'guide': (model.Guide,),
-    'page': (model.Page,),
-}
-
+r = redis.StrictRedis(**conf.REDIS)
 
 if __name__ == '__main__':
-    print "Search sync v %s" % __version__
-
-    connection = psycopg2.connect(database="webguide", user="dev", password="devpass")
-    connection.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+    print "Search sync v %s for noSQL solution" % __version__
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-    loop.run(connection, updater(es, conf.ES_INDEX), channel_params)
+
+    subscriber = r.pubsub()
+    subscriber.subscribe(['web::guide::delete', 'web::guide::update'])
+
+    for message in subscriber.listen():
+        try:
+            if message['channel'] == 'web::guide::update':
+                print 'update', message['data']
+                obj = json.loads(message['data']) #todo: I think we need to use id and a comma ',' separator in protocol instead of json loading
+                es.index(index='webguide', doc_type='guide', id=obj['id'], body=message['data'])
+            if message['channel'] == 'web::guide::delete':
+                print 'delete', message['data']
+                es.delete(index='webguide', doc_type='guide', id=int(message['data']))
+        except Exception as e:
+            print e.message
+
+
+
+
+

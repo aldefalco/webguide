@@ -71,7 +71,9 @@ class GuideListApi(Resource):
                             'title': args['title'],
                             'description': args['description']
                         }
-                        pipe.set('web::guide::obj::%s' % id, json.dumps(guide) )
+                        serial = json.dumps(guide)
+                        pipe.set('web::guide::obj::%s' % id,  serial)
+                        pipe.publish('web::guide::update', serial)
                         #todo: add publish signal for es
                         pipe.execute()
                         break
@@ -94,7 +96,9 @@ class GuideListApi(Resource):
                         pipe.multi()
                         for id in ids:
                             pipe.delete('web::guide::obj::%s' % id)
+                            pipe.publish('web::guide::delete', id)
                         pipe.delete('web::guide::seq', 'web::page::seq', 'web::guides')
+
                         pipe.execute()
                         break
                     except redis.WatchError:
@@ -124,7 +128,10 @@ class GuideApi(Resource):
                 'title': args['title'],
                 'description': args['description']
             }
-            r.set('web::guide::obj::%s' % id, json.dumps(guide) )
+            serial = json.dumps(guide)
+            r.set('web::guide::obj::%s' % id, serial )
+            #todo: we need to add a transaction here
+            r.publish('web::guide::update', serial)
             return guide, 201
         except Exception as e:
             log.exception(e.message)
@@ -134,6 +141,7 @@ class GuideApi(Resource):
     def delete(self, id):
         try:
             r.delete('web::guide::obj::%s' % id)
+            r.publish('web::guide::delete', id)
             return {  }, 204
         except Exception as e:
             log.exception(e.message)
