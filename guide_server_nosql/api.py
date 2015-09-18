@@ -156,7 +156,7 @@ class GuidePageListApi(Resource):
 
     def get(self, guide_id):
         try:
-            pages = [ json.loads(r.get('web::page::obj::%s' % id)) for id in r.smembers('web::guide::pages::%s' % guide_id)]
+            pages = [ json.loads(r.get('web::page::obj::%s' % id)) for id in r.zrange('web::guide::pages::%s' % guide_id, 0, -1)]
             return pages
         except Exception as e:
             log.exception(e.message)
@@ -175,7 +175,7 @@ class GuidePageListApi(Resource):
                         id = int(0 if not id else id) + 1
                         pipe.multi()
                         pipe.set('web::page::seq', id)
-                        pipe.sadd('web::guide::pages::%s' % guide_id, id)
+                        pipe.zadd('web::guide::pages::%s' % guide_id, args['order'], id)
                         page = {
                             'id': id,
                             'comment': args['comment'],
