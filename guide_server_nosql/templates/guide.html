@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>{{ guide.title }}</h1>
+
+    <p>{{ guide.description }}</p>
+
+    <div class="pages">
+    {% for page in guide.pages %}
+        <div class="page">
+            <img src="/{{ page.image }}">
+            <p>{{ page.comment }}</p>
+        </div>
+    {% endfor %}
+    </div>
+
+{% endblock %}

@@ -4,3 +4,4 @@
 /guide_server/tests/*.pyc
 /guide_server/sync/*.pyc
 /guide_server/sync/updaters/*.pyc
+/guide_server_nosql/*.pyc
