@@ -11,3 +11,9 @@ It has following modules:
 For database I use the PostgreSQL 9.4,  the Redis as a cache backend and the Elasticsearch for full text search.
 
 For REST API testing I intend to use the BDD Cucumber specifications and the 'Behave' test framework. For other python's modules the doctests and the unittest libs. For JavaScript I use the Jasmin and the Karma environments.
+
+
+UPDATE
+======
+
+I thought and decided to implement a full NoSQL solution. You can find this solution in the guide_server_nosql directory.
