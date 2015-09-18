@@ -20,15 +20,15 @@ if __name__ == '__main__':
     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
     subscriber = r.pubsub()
-    subscriber.subscribe(['web::guide::delete', 'web::guide::update'])
+    subscriber.subscribe(['web:guide:delete', 'web:guide:update'])
 
     for message in subscriber.listen():
         try:
-            if message['channel'] == 'web::guide::update':
+            if message['channel'] == 'web:guide:update':
                 print 'update', message['data']
                 obj = json.loads(message['data']) #todo: I think we need to use id and a comma ',' separator in protocol instead of json loading
                 es.index(index='webguide', doc_type='guide', id=obj['id'], body=message['data'])
-            if message['channel'] == 'web::guide::delete':
+            if message['channel'] == 'web:guide:delete':
                 print 'delete', message['data']
                 es.delete(index='webguide', doc_type='guide', id=int(message['data']))
         except Exception as e:
