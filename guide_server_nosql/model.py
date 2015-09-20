@@ -14,14 +14,25 @@ ordered set web:guide:pages:<guide_id> pages ids for the guide
 json key web:page:obj:<id> - content of page
 
 '''
+
+__author__ = 'alex'
+
 import json
 from utils import save_base64_image
 
-
-__author__ = 'alex'
 import redis
 import conf
 
+GUIDE_OBJ_KEY = 'web:guide:obj:%s'
+GUIDE_SET_KEY = 'web:guides'
+GUIDE_SEQ_KEY = 'web:guide:seq'
+
+GUIDE_UPDATE_CH = 'web:guide:update'
+GUIDE_DELETE_CH = 'web:guide:delete'
+
+PAGE_OBJ_KEY =  'web:page:obj:%s'
+PAGE_SEQ_KEY = 'web:page:seq'
+PAGE_SET_KEY = 'web:guide:pages:%s'
 
 r = redis.StrictRedis(**conf.REDIS)
 
@@ -35,29 +46,23 @@ class ModelMeta(type):
 class Guide(object):
 
     def get_all(self):
-        return [ json.loads(r.get('web:guide:obj:%s' % id)) for id in r.smembers('web:guides')]
+        return [ json.loads(r.get(GUIDE_OBJ_KEY % id)) for id in r.smembers(GUIDE_SET_KEY)]
 
     def create(self, **kwargs):
-        guide = {}
-            #id = r.incr('web:guide:seq')
+        guide = kwargs
+        #id = r.incr('web:guide:seq')
         with r.pipeline() as pipe:
             while True: #todo: change to counter
                 try:
-                    pipe.watch('web:guide:seq')
-                    id = pipe.get('web:guide:seq')
-                    id = int(0 if not id else id) + 1
+                    pipe.watch(GUIDE_SEQ_KEY)
+                    id = pipe.get(GUIDE_SEQ_KEY)
+                    guide['id'] = int(0 if not id else id) + 1
                     pipe.multi()
-                    pipe.set('web:guide:seq', id)
-                    pipe.sadd('web:guides', id)
-                    guide = {
-                        'id': id,
-                        'title': kwargs['title'],
-                        'description': kwargs['description']
-                    }
+                    pipe.set(GUIDE_SEQ_KEY, id)
+                    pipe.sadd(GUIDE_SET_KEY, id)
                     serial = json.dumps(guide)
-                    pipe.set('web:guide:obj:%s' % id,  serial)
-                    pipe.publish('web:guide:update', serial)
-                    #todo: add publish signal for es
+                    pipe.set(GUIDE_OBJ_KEY % id,  serial)
+                    pipe.publish(GUIDE_UPDATE_CH, serial)
                     pipe.execute()
                     break
                 except redis.WatchError:
@@ -68,13 +73,13 @@ class Guide(object):
         with r.pipeline() as pipe:
             while True: #todo: change it to counter
                 try:
-                    pipe.watch('web:guide:seq','web:guides')
-                    ids = [ id for id in pipe.smembers('web:guides')]
+                    pipe.watch(GUIDE_SEQ_KEY,GUIDE_SET_KEY)
+                    ids = [ id for id in pipe.smembers(GUIDE_SEQ_KEY)]
                     pipe.multi()
                     for id in ids:
-                        pipe.delete('web:guide:obj:%s' % id)
-                        pipe.publish('web:guide:delete', id)
-                    pipe.delete('web:guide:seq', 'web:page:seq', 'web:guides')
+                        pipe.delete(GUIDE_OBJ_KEY % id)
+                        pipe.publish(GUIDE_DELETE_CH, id)
+                    pipe.delete(GUIDE_SEQ_KEY, PAGE_SEQ_KEY, GUIDE_SET_KEY)
 
                     pipe.execute()
                     break
@@ -82,19 +87,19 @@ class Guide(object):
                     continue
 
     def get(self, id):
-        return json.loads(r.get('web:guide:obj:%s' % id))
+        return json.loads(r.get(GUIDE_OBJ_KEY % id))
 
 
     def update(self, **guide):
         serial = json.dumps(guide)
-        r.set('web:guide:obj:%s' % id, serial )
+        r.set(GUIDE_OBJ_KEY % id, serial )
         #todo: we need to add a transaction here
-        r.publish('web:guide:update', serial)
+        r.publish(GUIDE_UPDATE_CH, serial)
 
 
     def delete(self, id):
-        r.delete('web:guide:obj:%s' % id)
-        r.publish('web:guide:delete', id)
+        r.delete(GUIDE_OBJ_KEY % id)
+        r.publish(GUIDE_OBJ_KEY, id)
 
     __metaclass__ = ModelMeta
 
@@ -102,27 +107,23 @@ class Guide(object):
 class Page(object):
 
     def get_guide_pages(self, guide_id):
-        return [ json.loads(r.get('web:page:obj:%s' % id)) for id in r.zrange('web:guide:pages:%s' % guide_id, 0, -1)]
+        return [ json.loads(r.get(PAGE_OBJ_KEY % id)) for id in r.zrange(PAGE_SET_KEY % guide_id, 0, -1)]
 
     def create(self, guide_id, **args):
-        page = {}
+        page = args
+        image = save_base64_image(page['src'])
+        del page['src']
         with r.pipeline() as pipe:
             while True: #todo: change to counter
                 try:
-                    pipe.watch('web:page:seq')
-                    id = pipe.get('web:page:seq')
-                    id = int(0 if not id else id) + 1
+                    pipe.watch(PAGE_SEQ_KEY)
+                    id = pipe.get(PAGE_SEQ_KEY)
+                    page['id'] = int(0 if not id else id) + 1
+                    page['image'] = image
                     pipe.multi()
-                    pipe.set('web:page:seq', id)
-                    pipe.zadd('web:guide:pages:%s' % guide_id, args['order'], id)
-                    page = {
-                        'id': id,
-                        'comment': args['comment'],
-                        'region': args['region'],
-                        'order': args['order'],
-                        'image': save_base64_image(args['src'])
-                    }
-                    pipe.set('web:page:obj:%s' % id, json.dumps(page) )
+                    pipe.set(PAGE_SEQ_KEY, id)
+                    pipe.zadd(PAGE_SET_KEY % guide_id, args['order'], id)
+                    pipe.set(PAGE_OBJ_KEY % id, json.dumps(page) )
                     #todo: add publish signal for es
                     pipe.execute()
                     break
@@ -131,7 +132,7 @@ class Page(object):
         return page
 
     def delete_guide_pages(self, guide_id):
-        page_set = 'web:guide:pages:%s' % guide_id
+        page_set = PAGE_SET_KEY % guide_id
         with r.pipeline() as pipe:
             while True: #todo: change it to counter
                 try:
@@ -139,7 +140,7 @@ class Page(object):
                     ids = [ id for id in pipe.smembers(page_set)]
                     pipe.multi()
                     for id in ids:
-                        pipe.delete('web:page:obj:%s' % id)
+                        pipe.delete(PAGE_OBJ_KEY % id)
                     pipe.delete(page_set)
                     pipe.execute()
                     break
@@ -147,14 +148,14 @@ class Page(object):
                     continue
 
     def get(self, id):
-        return json.loads(r.get('web:page:obj:%s' % id))
+        return json.loads(r.get(PAGE_OBJ_KEY % id))
 
     def update(self, **args):
-        r.set('web:page:obj:%s' % id, json.dumps(args) )
+        r.set(PAGE_OBJ_KEY % id, json.dumps(args) )
         return args
 
     def delete(self, id):
-        r.delete('web:page:obj:%s' % id)
+        r.delete(PAGE_OBJ_KEY % id)
 
 
     __metaclass__ = ModelMeta
