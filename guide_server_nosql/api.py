@@ -12,8 +12,8 @@ import traceback
 import logging
 
 from flask.ext import restful
-from flask.ext.restful import marshal, fields, Resource
-from utils import declare_api, save_base64_image
+from flask.ext.restful import Resource
+from utils import declare_api
 
 from app import instance as app
 from model import Guide, Page
@@ -40,9 +40,11 @@ class Version(Resource):
         return { 'version' : 'v1'}
 
 
-
 @declare_api(api, '/v1/guide',
-             [('title', str), ('description', str)])
+             [
+                 ('title', str),
+                 ('description', str)
+             ])
 class GuideListApi(Resource):
 
     def get(self):
@@ -71,7 +73,10 @@ class GuideListApi(Resource):
 
 
 @declare_api(api, '/v1/guide/<int:id>',
-             [('title', str), ('description', str)] )
+             [
+                 ('title', str),
+                 ('description', str)
+             ])
 class GuideApi(Resource):
 
     def get(self, id):
@@ -100,7 +105,12 @@ class GuideApi(Resource):
 
 
 @declare_api(api, '/v1/guide/<int:guide_id>/page',
-             [('src', str),('comment', str),('region', str), ('order', int)] )
+             [
+                 ('src', str),
+                 ('comment', str),
+                 ('region', str),
+                 ('order', int)
+             ])
 class GuidePageListApi(Resource):
 
     def get(self, guide_id):
@@ -123,7 +133,7 @@ class GuidePageListApi(Resource):
 
     def delete(self, guide_id):
         try:
-            Page.delete_guide_pages(guide_id)
+            Page.objects.delete_guide_pages(guide_id)
             return {}, 204
         except Exception as e:
             log.exception(e.message)
@@ -132,7 +142,11 @@ class GuidePageListApi(Resource):
 
 
 @declare_api(api, '/v1/guide/<int:guide_id>/page/<int:id>',
-             [('src', str),('comment', str),('region', str)])
+             [
+                 ('src', str),
+                 ('comment', str),
+                 ('region', str)
+             ])
 class GuidePageApi(Resource):
 
     def get(self, guide_id, id):
